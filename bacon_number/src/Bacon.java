@@ -7,9 +7,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Bacon {
-<<<<<<< HEAD
-
-
     // name -> Movies that actor has been in
     // name -> Actor object
     private Map<Integer, Actor> actors;
@@ -46,48 +43,6 @@ public class Bacon {
 
         while (!fringe.isEmpty()) {
             Actor curr = fringe.poll();
-=======
-	
-	
-	// name -> Movies that actor has been in
-	// name -> Actor object
-	private Map<Integer,Actor> actors;
-	private Map<Integer,Movie> movies;
-	
-	public Bacon() {
-		actors = new HashMap<Integer,Actor>();
-		movies = new HashMap<Integer, Movie>();
-	}
-	
-	/**
-	 * Given that the imdb and movies maps are properly
-	 * initialized from readFile. Explore all of the imdb
-	 * starting from Kevin Bacon in a breadth-first manner.
-	 * After completing traverse, all Actors connected to
-	 * Kevin Bacon (by one or more links) should have 
-	 * their Bacon numbers set.
-	 */
-	public void traverse() // breadth-first
-	{
-		int vis = 1;
-		long begin = System.currentTimeMillis();
-		Actor start  = actors.get(22591);
-		start.setNumber(0);
-		start.setPrevActor(null);
-
-		Queue<Actor> fringe = new LinkedList<>();
-		fringe.add(start);
-		Set<Actor> visited = new HashSet<>();
-
-		while (!fringe.isEmpty()) {
-			Actor curr = fringe.poll();
-			visited.add(curr);
-			System.out.println("vis # : " + vis);
-			System.out.println(curr.getId() + " " + curr.getName() + " " + curr.getNumber());
-//			System.out.println("movies: " + curr.getMovies());
-			System.out.println("fringe size: " + fringe.size());
-			System.out.println("#");
->>>>>>> parent of 4d3367a... not working
 
 //			if (vis % 1000 == 0){
 //
@@ -103,7 +58,6 @@ public class Bacon {
 ////				System.exit(0);
 //			}
 
-<<<<<<< HEAD
             // for every actor who was a costar with curr
             for (Actor a : coStars.keySet()) {
                 // add to queue
@@ -295,83 +249,4 @@ public class Bacon {
         //bfs.printChain(22591); // Kevin Bacon's ID
         bfs.printChain(bfs.getTargetActorId()); // Cynthia Dane's ID
     }
-=======
-			// for every actor who was a costar with curr
-			for (Actor a: coStars.keySet())
-			{
-				// add to queue
-				if (!visited.contains(a))
-				{
-					fringe.add(a);
-					a.setNumber(curr.getNumber() + 1);
-					a.setPrevActor(curr);
-					a.setSharedMovie(coStars.get(a));
-				}
-			}
-			vis += 1;
-		}
-		System.out.println("Traversal: Time elapsed " +
-				(System.currentTimeMillis() - begin)/1000.0 + "s");
-	}
-	
-	public void printTable()
-	{
-		
-	}
-	
-	/**
-	 * Print the chain from Kevin Bacon to specified
-	 * actor or actress. If no such actor or actress. print
-	 * error message
-	 * Actor Name has a Bacon number of X
-	 * Actor Name appeared in Movie Nam with Actor 2 Name
-	 * ...
-	 * Actor Z Name appeared in Movie Z Name with Kevin Bacon
-	 * @param id for actor or actress.
-	 */
-	public void printChain(Integer id)
-	{
-		Actor start  = actors.get(id);
-		Actor dest = actors.get(22591);
-		
-		if (dest == null)
-			System.out.println("No such actor " + id);
-		if (dest.getNumber() == Integer.MAX_VALUE)
-		{
-			System.out.println(dest.getName() + " has a Bacon number of infinity");
-			return;
-		}
-		System.out.println(dest.getName() + " has a Bacon number of " + 
-				dest.getNumber());
-
-		while (dest != start)
-		{
-			System.out.println(dest.getName() + " was in " +
-					dest.getSharedMovie().getName() + " with " + 
-					dest.getPrevActor().getName());
-			dest = dest.getPrevActor();
-		}
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Bacon bfs = new Bacon();
-		try {
-			BaconJsonParser parser = new BaconJsonParser();
-			bfs.actors = parser.getActors();
-			bfs.movies = parser.getMovies();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		/*
-		See https://www.cs.duke.edu/courses/fall07/cps100e/class/10_Bacon/
-		and https://www.cs.duke.edu/courses/fall07/cps100e/class/10_Bacon/codev2/
-		 */
-		bfs.traverse();
-		//bfs.printChain(22591); // Kevin Bacon's ID
-		bfs.printChain(592813); // Cynthia Dane's ID
-	}
->>>>>>> parent of 4d3367a... not working
 }
