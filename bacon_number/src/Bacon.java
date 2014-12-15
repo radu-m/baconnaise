@@ -274,11 +274,22 @@ public class Bacon {
     }
 
     public void setStartActorName(String name) {
-        startActorId = actorNames.get(name);
+        startActorId = getActorIdFromName(name);
     }
 
     public void setTargetActorName(String name) {
-        targetActorId = actorNames.get(name);
+        targetActorId = getActorIdFromName(name);
+    }
+
+    private Integer getActorIdFromName(String name) {
+        if (actorNames.containsKey(name))
+            return actorNames.get(name);
+        else {
+            System.out.println(name + " was not found in the database.");
+            System.out.println("Please check your spelling or choose another actor");
+            System.exit(0);
+        }
+        return null;
     }
 
     public void setTargetActorIdId(int id) {
