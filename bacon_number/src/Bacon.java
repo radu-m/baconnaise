@@ -2,6 +2,7 @@ import imdb.*;
 import parse.BaconJsonParser;
 
 import java.io.FileNotFoundException;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -11,14 +12,18 @@ public class Bacon {
     // name -> Actor object
     private Map<Integer, Actor> actors;
     private Map<Integer, Movie> movies;
-    private Integer startActorId = 22591; // Kevin Bacon
+    private Integer startActorId = null; // Kevin Bacon
     private Integer targetActorId = null;
     private Integer startMovieId = null;
+    private int linkableActors;
+    List<Integer> actorDistribution = null;
     private Queue<Movie> movieQueue = new ArrayDeque<>(); // faster than linkedList
+    private Map<String, Integer> actorNames;
 
     public Bacon() {
-        actors = new HashMap<Integer, Actor>();
-        movies = new HashMap<Integer, Movie>();
+        actors = new HashMap<>();
+        movies = new HashMap<>();
+        actorNames = new HashMap<>();
     }
 
     /**
@@ -115,13 +120,13 @@ public class Bacon {
             Map<Actor, Movie> coStars = currActor.coStars();
 
             for(Actor a: coStars.keySet()) {
-                if (!a.isVisited()) {
+                if (!a.isVisited() && !a.equals(startActor)) {
                     fringe.add(a);
                     a.setNumber(currActor.getNumber() + 1);
                     a.setPrevActor(currActor);
                     a.setSharedMovie(coStars.get(a));
                     a.toggleVisited();
-                    System.out.println("fringe size: " + fringe.size());
+                    //System.out.println("fringe size: " + fringe.size());
 
                     if(a.getId() == targetActorId){
                         break;
@@ -188,14 +193,13 @@ public class Bacon {
      * ...
      * Actor Z Name appeared in Movie Z Name with Kevin Bacon
      *
-     * @param id for actor or actress.
      */
-    public void printChain(Integer id) {
+    public void printChain() {
         Actor start = actors.get(startActorId);
-        Actor dest = actors.get(id);
+        Actor dest = actors.get(targetActorId);
 
         if (dest == null)
-            System.out.println("No such actor " + id);
+            System.out.println("No such actor " + targetActorId);
         if (dest.getNumber() == Integer.MAX_VALUE) {
             System.out.println(dest.getName() + " has a Bacon number of infinity");
             return;
@@ -211,8 +215,70 @@ public class Bacon {
         }
     }
 
+    protected List<Integer> initializeArrayList() {
+        System.out.println("Initializing ArrayList...");
+        List<Integer> a = new ArrayList<>();
+        for (int i = 0; i < 11; i ++) {
+            a.add(i, 0);
+        }
+        System.out.println("Array size: " + a.size());
+        System.out.println("Finished...");
+        return a;
+    }
+
+    private void generateTable() {
+        linkableActors = 0;
+        actorDistribution = initializeArrayList();
+        System.out.println("Generating distribution of actors...");
+        int numOfActorsByIndex;
+        for (Actor actor : actors.values()) {
+            int baconNumber = actor.getNumber();
+            if (baconNumber <= 10) {
+                linkableActors++;
+                numOfActorsByIndex = actorDistribution.get(baconNumber) + 1;
+                actorDistribution.set(actor.getNumber(), numOfActorsByIndex);
+            }
+        }
+        System.out.println("Finished...");
+    }
+
+    private void printTable() {
+        generateTable();
+        System.out.println("Printing actor distribution...");
+        System.out.println("");
+        for (int i = 0; i < 11; i ++) {
+            System.out.println(i + " - " + actorDistribution.get(i));
+        }
+    }
+
+    public void printAvgActorNumber() {
+        printTable();
+        int weightedDistribution = 0;
+        String centerName = actors.get(startActorId).getName();
+        for (int i =0; i < actorDistribution.size(); i++) {
+            weightedDistribution = weightedDistribution + (i * actorDistribution.get(i));
+        }
+        // Casting to double to preserve precision
+        double avgNum = (double)weightedDistribution / linkableActors;
+        DecimalFormat df = new DecimalFormat("###.##");
+        String rndAvgNum = df.format(avgNum);
+
+        System.out.println("");
+        System.out.println("Total number of linkable actors: " + linkableActors);
+        System.out.println("Weighted total of linkable actors: " + weightedDistribution);
+        System.out.println("Average " + centerName + " number: " + rndAvgNum);
+    }
+
     public void setStartActorId(int id) {
         startActorId = id;
+    }
+
+    public void setStartActorName(String name) {
+        startActorId = actorNames.get(name);
+    }
+
+    public void setTargetActorName(String name) {
+        targetActorId = actorNames.get(name);
     }
 
     public void setTargetActorIdId(int id) {
@@ -232,13 +298,14 @@ public class Bacon {
             BaconJsonParser parser = new BaconJsonParser();
             bfs.actors = parser.getActors();
             bfs.movies = parser.getMovies();
-            System.out.println("movies count: " + bfs.movies.size());
+            bfs.actorNames = parser.getActorNames();
+            //System.out.println("movies count: " + bfs.movies.size());
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-        bfs.setTargetActorIdId(592813);
+        bfs.setStartActorName("Kevin Bacon");
+        //bfs.setTargetActorName("Cynthia Dane");
         /*
         See https://www.cs.duke.edu/courses/fall07/cps100e/class/10_Bacon/
 		and https://www.cs.duke.edu/courses/fall07/cps100e/class/10_Bacon/codev2/
@@ -247,6 +314,7 @@ public class Bacon {
         bfs.traverseByMovies();
 
         //bfs.printChain(22591); // Kevin Bacon's ID
-        bfs.printChain(bfs.getTargetActorId()); // Cynthia Dane's ID
+        //bfs.printChain(); // Cynthia Dane's ID 592813
+        bfs.printAvgActorNumber();
     }
 }

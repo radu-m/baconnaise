@@ -17,10 +17,11 @@ import imdb.*;
 
 public class BaconJsonParser {
 
-    private final File folder = new File("D:/ITU/Algorithms II/imdb_json_tables");
+    private final File folder = new File("/Users/philipriley/Documents/ITU/Algorithm Design 2/imdb_json_tables");
     private HashMap<String, String> jsonFiles = new LinkedHashMap<>();
 
     private Map<Integer, Actor> actors = new HashMap<>();
+    private Map<String, Integer> actorNames = new HashMap<>();
     private Map<Integer, HashSet<Role>> roles = new HashMap<>();
     private Map<Integer, Movie> movies = new HashMap<>();
     private Map<Integer, Director> directors = new HashMap<>();
@@ -53,6 +54,7 @@ public class BaconJsonParser {
 //                                System.exit(0);
 //                            }
                             actors.put(actor.getId(), actor);
+                            actorNames.put(actor.getName(), actor.getId());
                         }
                         System.out.println("Finished...");
                         System.out.println("Size of actors hashMap: " + actors.size());
@@ -147,5 +149,9 @@ public class BaconJsonParser {
 
     public Map<Integer,Movie> getMovies() {
         return movies;
+    }
+
+    public Map<String, Integer> getActorNames() {
+        return actorNames;
     }
 }
