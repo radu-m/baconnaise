@@ -19,6 +19,8 @@ public class Actor implements Serializable {
     private int filmCount;
     private Actor prevActor;
     private int number;
+
+    private double avgNumber;
     private HashMap<Actor, Movie> myCoStars;
 
     private ArrayList<Movie> movies;
@@ -95,5 +97,17 @@ public class Actor implements Serializable {
 
     public ArrayList<Movie> getMovies() {
         return movies;
+    }
+
+    public double getAvgNumber() {
+        return avgNumber;
+    }
+
+    public void setAvgNumber(double avgNumber) {
+        this.avgNumber = avgNumber;
+    }
+
+    public void setVisited(boolean visited) {
+        this.visited = visited;
     }
 }

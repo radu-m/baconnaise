@@ -15,10 +15,11 @@ public class Bacon {
     private Integer startActorId = null; // Kevin Bacon
     private Integer targetActorId = null;
     private Integer startMovieId = null;
-    private int linkableActors;
+    private Integer linkableActors;
     List<Integer> actorDistribution = null;
     private Queue<Movie> movieQueue = new ArrayDeque<>(); // faster than linkedList
     private Map<String, Integer> actorNames;
+    private Map<Integer, Double> actorAverages = new HashMap<>();
 
     public Bacon() {
         actors = new HashMap<>();
@@ -138,6 +139,66 @@ public class Bacon {
                 (System.currentTimeMillis() - startTime) / 1000.0 + "s");
     }
 
+    private void resetActors() {
+        for (Actor actor : actors.values()) {
+            actor.setNumber(Integer.MAX_VALUE);
+            actor.setPrevActor(null);
+            actor.setSharedMovie(null);
+            actor.setVisited(false);
+        }
+    }
+
+    public void traverseByMoviesForAntiBacon(List<Actor> filteredActors) {
+
+        long startTime = System.currentTimeMillis();
+        System.out.println("Generating average numbers for filtered actors...");
+        int loop = 0;
+        int numActors = 0;
+        for (Actor actor : filteredActors) {
+            numActors++;
+            loop++;
+            if (loop == 250) {
+                loop = 0;
+                System.out.println("Num of Actors processed: " + numActors);
+            }
+            startActorId = actor.getId();
+            Actor startActor = actors.get(actor.getId());
+            resetActors();
+            startActor.setNumber(0);
+            startActor.setPrevActor(null);
+
+            Queue<Actor> fringe = new ArrayDeque<>();
+            fringe.add(actor);
+
+            while (!fringe.isEmpty()) {
+                Actor currActor = fringe.poll();
+                Map<Actor, Movie> coStars = currActor.coStars();
+
+                for (Actor a : coStars.keySet()) {
+                    if (!a.isVisited() && !a.equals(startActor)) {
+                        fringe.add(a);
+                        a.setNumber(currActor.getNumber() + 1);
+                        a.setPrevActor(currActor);
+                        a.setSharedMovie(coStars.get(a));
+                        a.toggleVisited();
+
+                        if (a.getId() == targetActorId) {
+                            break;
+                        }
+                    }
+                }
+            }
+            genAvgActorNumber(false);
+            actorAverages.put(startActor.getId(), startActor.getAvgNumber());
+        }
+        for (Map.Entry<Integer, Double> entry : actorAverages.entrySet()) {
+            if (entry.getValue() > 1.0)
+                System.out.println("Actor: " + actors.get(entry.getKey()).getName() + " - Average Number: " + entry.getValue());
+        }
+        System.out.println("Traversal: Time elapsed " +
+                (System.currentTimeMillis() - startTime) / 1000.0 + "s");
+    }
+
     public void createMovieQueue() {
         /**
          * TODO: optimize this! probably not necessary to create a third list
@@ -216,20 +277,16 @@ public class Bacon {
     }
 
     protected List<Integer> initializeArrayList() {
-        System.out.println("Initializing ArrayList...");
         List<Integer> a = new ArrayList<>();
         for (int i = 0; i < 11; i ++) {
             a.add(i, 0);
         }
-        System.out.println("Array size: " + a.size());
-        System.out.println("Finished...");
         return a;
     }
 
     private void generateTable() {
         linkableActors = 0;
         actorDistribution = initializeArrayList();
-        System.out.println("Generating distribution of actors...");
         int numOfActorsByIndex;
         for (Actor actor : actors.values()) {
             int baconNumber = actor.getNumber();
@@ -239,7 +296,6 @@ public class Bacon {
                 actorDistribution.set(actor.getNumber(), numOfActorsByIndex);
             }
         }
-        System.out.println("Finished...");
     }
 
     private void printTable() {
@@ -251,22 +307,23 @@ public class Bacon {
         }
     }
 
-    public void printAvgActorNumber() {
-        printTable();
+    public void genAvgActorNumber(Boolean print) {
+        if (print) printTable(); else generateTable();
         int weightedDistribution = 0;
-        String centerName = actors.get(startActorId).getName();
+        Actor actor = actors.get(startActorId);
         for (int i =0; i < actorDistribution.size(); i++) {
             weightedDistribution = weightedDistribution + (i * actorDistribution.get(i));
         }
         // Casting to double to preserve precision
-        double avgNum = (double)weightedDistribution / linkableActors;
+        actor.setAvgNumber((double) weightedDistribution / linkableActors);
         DecimalFormat df = new DecimalFormat("###.##");
-        String rndAvgNum = df.format(avgNum);
-
-        System.out.println("");
-        System.out.println("Total number of linkable actors: " + linkableActors);
-        System.out.println("Weighted total of linkable actors: " + weightedDistribution);
-        System.out.println("Average " + centerName + " number: " + rndAvgNum);
+        String rndAvgNum = df.format(actor.getAvgNumber());
+        if (print) {
+            System.out.println("");
+            System.out.println("Total number of linkable actors: " + linkableActors);
+            System.out.println("Weighted total of linkable actors: " + weightedDistribution);
+            System.out.println("Average " + actor.getName() + " number: " + rndAvgNum);
+        }
     }
 
     public void setStartActorId(int id) {
@@ -300,6 +357,24 @@ public class Bacon {
         return targetActorId;
     }
 
+    private void findAntiBacon() {
+        HashMap<Integer, Actor> sortedMap = new HashMap<>();
+        List<Actor> filteredActors = new ArrayList<>();
+        HashMap<Integer, Integer> currentBaconNumbers = new HashMap<>();
+        for (Actor actor : actors.values())
+            currentBaconNumbers.put(actor.getId(), actor.getNumber());
+        System.out.println("");
+        System.out.println("Finding the anti-bacon...");
+        System.out.println("Filtering actors by high bacon numbers...");
+        for (Actor actor : actors.values()) {
+            if ( actor.getNumber() > 4 && actor.getNumber() < 11 )
+                filteredActors.add(actor);
+        }
+        System.out.println("Filtered Actors Size: " + filteredActors.size());
+
+        traverseByMoviesForAntiBacon(filteredActors);
+    }
+
     /**
      * @param args
      */
@@ -326,6 +401,7 @@ public class Bacon {
 
         //bfs.printChain(22591); // Kevin Bacon's ID
         //bfs.printChain(); // Cynthia Dane's ID 592813
-        bfs.printAvgActorNumber();
+        bfs.genAvgActorNumber(true);
+        bfs.findAntiBacon();
     }
 }
