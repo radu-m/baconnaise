@@ -1,5 +1,6 @@
 import imdb.*;
 import parse.BaconJsonParser;
+import parse.JsonSingleRecordsPerLine;
 
 import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
@@ -276,9 +277,9 @@ public class Bacon {
         }
     }
 
-    protected List<Integer> initializeArrayList() {
+    protected List<Integer> initializeArrayList(int size) {
         List<Integer> a = new ArrayList<>();
-        for (int i = 0; i < 11; i ++) {
+        for (int i = 0; i < size; i ++) {
             a.add(i, 0);
         }
         return a;
@@ -286,7 +287,7 @@ public class Bacon {
 
     private void generateTable() {
         linkableActors = 0;
-        actorDistribution = initializeArrayList();
+        actorDistribution = initializeArrayList(11);
         int numOfActorsByIndex;
         for (Actor actor : actors.values()) {
             int baconNumber = actor.getNumber();
@@ -381,6 +382,10 @@ public class Bacon {
     public static void main(String[] args) {
         Bacon bfs = new Bacon();
         try {
+            // Only used to converting json files to single line records for mapreduce
+            new JsonSingleRecordsPerLine();
+            System.exit(0);
+
             BaconJsonParser parser = new BaconJsonParser();
             bfs.actors = parser.getActors();
             bfs.movies = parser.getMovies();
@@ -402,6 +407,23 @@ public class Bacon {
         //bfs.printChain(22591); // Kevin Bacon's ID
         //bfs.printChain(); // Cynthia Dane's ID 592813
         bfs.genAvgActorNumber(true);
+        //bfs.top10BestConnectedActors();
         bfs.findAntiBacon();
+    }
+
+
+    private void top10BestConnectedActors() {
+        System.out.println("Top 10 most directly connected actors...");
+        List<Actor> actorsList = new ArrayList<>(actors.values());
+        Collections.sort(actorsList, Collections.reverseOrder());
+        Actor actor = null;
+        for (int i = 0; i < 10; i++) {
+            actor = actorsList.get(i);
+            System.out.println("Actor: " + actor.getName() + " - Connections: " + actorsList.get(i).myCoStarsSize());
+        }
+    }
+
+    private void bestConnected() {
+
     }
 }

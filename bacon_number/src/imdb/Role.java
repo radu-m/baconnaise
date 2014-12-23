@@ -1,5 +1,7 @@
 package imdb;
 
+import com.google.gson.annotations.Expose;
+
 import java.io.Serializable;
 
 /**
@@ -11,9 +13,9 @@ import java.io.Serializable;
  */
 public class Role implements Serializable{
 
-    private int actor_id;
-    private int movie_id;
-    private String role;
+    @Expose private int actor_id;
+    @Expose private int movie_id;
+    @Expose private String role;
 
     public Role() {
 

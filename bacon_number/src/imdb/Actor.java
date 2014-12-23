@@ -1,5 +1,7 @@
 package imdb;
 
+import com.google.gson.annotations.Expose;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,12 +13,12 @@ import java.util.HashMap;
  * Time: 1:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Actor implements Serializable {
-    private int id;
-    private String first_name;
-    private String last_name;
-    private String gender;
-    private int filmCount;
+public class Actor implements Serializable, Comparable<Actor> {
+    @Expose private int id;
+    @Expose private String first_name;
+    @Expose private String last_name;
+    @Expose private String gender;
+    @Expose private int filmCount;
     private Actor prevActor;
     private int number;
 
@@ -109,5 +111,30 @@ public class Actor implements Serializable {
 
     public void setVisited(boolean visited) {
         this.visited = visited;
+    }
+
+    public Integer myCoStarsSize() {
+        int size = 0;
+        if (myCoStars != null) {
+            size = myCoStars.size();
+        }
+        return size;
+    }
+
+    /**
+     *if (this == aThat) return EQUAL;
+     * @param a Actor
+     * @return int
+     */
+    @Override
+    public int compareTo(Actor a) {
+        final int BEFORE = -1;
+        final int EQUAL = 0;
+        final int AFTER = 1;
+
+        if (this == a) return EQUAL;
+        if (this.myCoStarsSize() < a.myCoStarsSize()) return BEFORE;
+        if (this.myCoStarsSize() > a.myCoStarsSize()) return AFTER;
+        return 0;
     }
 }

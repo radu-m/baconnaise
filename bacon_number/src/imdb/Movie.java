@@ -1,5 +1,7 @@
 package imdb;
 
+import com.google.gson.annotations.Expose;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -11,10 +13,10 @@ import java.util.ArrayList;
  * To change this template use File | Settings | File Templates.
  */
 public class Movie implements Serializable {
-    private int id;
-    private String name;
-    private Integer year;
-    private String rank;
+    @Expose private int id;
+    @Expose private String name;
+    @Expose private Integer year;
+    @Expose private String rank;
     private ArrayList<Actor> actors;
 
     public Movie(){
