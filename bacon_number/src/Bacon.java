@@ -383,8 +383,8 @@ public class Bacon {
         Bacon bfs = new Bacon();
         try {
             // Only used to converting json files to single line records for mapreduce
-            new JsonSingleRecordsPerLine();
-            System.exit(0);
+//            new JsonSingleRecordsPerLine();
+//            System.exit(0);
 
             BaconJsonParser parser = new BaconJsonParser();
             bfs.actors = parser.getActors();
